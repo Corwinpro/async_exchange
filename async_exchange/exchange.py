@@ -2,8 +2,13 @@ import asyncio
 import time
 import random
 from collections import defaultdict, deque
+import logging
 
-from async_exchange.api import BuyOrder, SellOrder
+from async_exchange.orders import BuyOrder, SellOrder
+from async_exchange.trader import NotEnoughMoneyError, NotEnoughStocksError
+
+logger = logging.getLogger(__name__)
+
 
 class Level(deque):
     pass
@@ -70,29 +75,56 @@ class Exchange:
             matched_sell_order = self.sell_levels[current_best_sell][0]
 
             if matched_sell_order.amount > order.amount:
-                matched_sell_order.owner.money += order.amount * matched_sell_order.price
-                matched_sell_order.owner.stocks -= order.amount
+                stocks_to_transfer = order.amount
+                money_to_transfer = stocks_to_transfer * matched_sell_order.price
 
-                order.owner.money -= order.amount * matched_sell_order.price
-                order.owner.stocks += order.amount
+                if (
+                    matched_sell_order.owner.stocks < stocks_to_transfer
+                    or order.owner.money < money_to_transfer
+                ):
+                    return
 
-                matched_sell_order.amount -= order.amount
+                matched_sell_order.owner.stocks -= stocks_to_transfer
+                matched_sell_order.owner.money += money_to_transfer
+
+                order.owner.stocks += stocks_to_transfer
+                order.owner.money -= money_to_transfer
+
+                matched_sell_order.amount -= stocks_to_transfer
             elif matched_sell_order.amount < order.amount:
-                matched_sell_order.owner.money += matched_sell_order.amount * matched_sell_order.price
-                matched_sell_order.owner.stocks -= matched_sell_order.amount
+                stocks_to_transfer = matched_sell_order.amount
+                money_to_transfer = stocks_to_transfer * matched_sell_order.price
 
-                order.owner.money -= matched_sell_order.amount * matched_sell_order.price
-                order.owner.stocks += matched_sell_order.amount
+                if (
+                    matched_sell_order.owner.stocks < stocks_to_transfer
+                    or order.owner.money < money_to_transfer
+                ):
+                    return
+
+                matched_sell_order.owner.money += money_to_transfer
+                matched_sell_order.owner.stocks -= stocks_to_transfer
+
+                order.owner.money -= money_to_transfer
+                order.owner.stocks += stocks_to_transfer
                 
-                order.amount -= matched_sell_order.amount
+                order.amount -= stocks_to_transfer
                 self.sell_levels[current_best_sell].popleft()
                 self._process_buy_order(order)
             else:
-                matched_sell_order.owner.money += order.amount * matched_sell_order.price
-                matched_sell_order.owner.stocks -= order.amount
+                stocks_to_transfer = order.amount
+                money_to_transfer = stocks_to_transfer * matched_sell_order.price
 
-                order.owner.money += order.amount * matched_sell_order.price
-                order.owner.stocks += order.amount
+                if (
+                    matched_sell_order.owner.stocks < stocks_to_transfer
+                    or order.owner.money < money_to_transfer
+                ):
+                    return
+
+                matched_sell_order.owner.money += money_to_transfer
+                matched_sell_order.owner.stocks -= stocks_to_transfer
+
+                order.owner.money -= money_to_transfer
+                order.owner.stocks += stocks_to_transfer
 
                 self.sell_levels[current_best_sell].popleft()
 
