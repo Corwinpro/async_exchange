@@ -3,21 +3,7 @@ import time
 import random
 from collections import defaultdict, deque
 
-
-class _Order:
-    def __init__(self, owner, amount, price):
-        self.owner = owner
-        self.amount = amount
-        self.price = price
-
-    def __repr__(self):
-        return f"Trader {self.owner._id} {self.action} {self.amount}"
-
-class BuyOrder(_Order):
-    action = "buys"
-
-class SellOrder(_Order):
-    action = "sells"
+from async_exchange.api import BuyOrder, SellOrder
 
 class Level(deque):
     pass
@@ -157,77 +143,3 @@ class Exchange:
             if order.owner is trader
         )
         return buy_orders, sell_orders
-
-
-exchange = Exchange()
-
-class NotEnoughMoneyError(ValueError):
-    pass
-
-class NotEnoughStocksError(ValueError):
-    pass
-
-
-class Trader:
-    _id = 1
-
-    def __init__(self, money=100, stocks=10):
-        self._money = None
-        self._stocks = None
-
-        self.money = money
-        self.stocks = stocks
-        self._id = Trader._id
-        Trader._id += 1
-
-    @property
-    def money(self):
-        return self._money
-
-    @money.setter
-    def money(self, value):
-        if value < 0:
-            raise NotEnoughMoneyError
-        self._money = value
-
-    @property
-    def stocks(self):
-        return self._stocks
-
-    @stocks.setter
-    def stocks(self, value):
-        if value < 0:
-            raise NotEnoughStocksError
-        self._stocks = value
-
-    def sell(self, amount, price):
-        exchange.process_order(
-            SellOrder(self, amount, price)
-        )
-
-    def buy(self, amount, price):
-        exchange.process_order(
-            BuyOrder(self, amount, price)
-        )
-
-    def __str__(self):
-        return f"Trader {self._id}: stocks {self.stocks}, cash {self.money}"
-
-
-if __name__ == "__main__":
-
-    trader_1 = Trader()
-    trader_2 = Trader()
-
-    trader_1.sell(30, 4)
-    trader_1.sell(50, 5)
-    trader_1.sell(5, 3)
-    trader_2.buy(100, 1)
-    print(exchange)
-
-    trader_2.buy(40, 2)
-    print(exchange)
-
-    trader_1.buy(40, 5)
-    print(exchange)
-    
