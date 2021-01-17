@@ -46,7 +46,7 @@ class TestExchange(unittest.TestCase):
         self.trader_1.buy(100, 10)
         self.trader_2.sell(42, 20)
 
-        self.assertEqual(len(self.exchange.buy_levels), 1)
+        self.assertEqual(len(self.exchange.buy_levels), 2)
         buy_level = self.exchange.buy_levels[10]
         (existing_order,) = buy_level
 
