@@ -1,4 +1,4 @@
-from async_exchange.api import BuyOrder, SellOrder
+from async_exchange.orders import BuyOrder, SellOrder
 
 class NotEnoughMoneyError(ValueError):
     pass
