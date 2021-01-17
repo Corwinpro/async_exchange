@@ -7,8 +7,10 @@ class _Order:
     def __repr__(self):
         return f"Trader {self.owner._id} {self.action} {self.amount}"
 
+
 class BuyOrder(_Order):
     action = "buys"
+
 
 class SellOrder(_Order):
     action = "sells"

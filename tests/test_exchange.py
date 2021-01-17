@@ -8,41 +8,21 @@ from async_exchange.orders import BuyOrder, SellOrder
 class TestExchange(unittest.TestCase):
     def setUp(self):
         self.exchange = Exchange()
-        self.trader_1 = Trader(
-            exchange=self.exchange,
-            money=100,
-            stocks=10
-        )
-        self.trader_2 = Trader(
-            exchange=self.exchange,
-            money=100,
-            stocks=10
-        )
-        self.trader_3 = Trader(
-            exchange=self.exchange,
-            money=100,
-            stocks=10
-        )
-        self.trader_4 = Trader(
-            exchange=self.exchange,
-            money=100,
-            stocks=10
-        )
-        self.trader_5 = Trader(
-            exchange=self.exchange,
-            money=100,
-            stocks=10
-        )
+        self.trader_1 = Trader(exchange=self.exchange, money=100, stocks=10)
+        self.trader_2 = Trader(exchange=self.exchange, money=100, stocks=10)
+        self.trader_3 = Trader(exchange=self.exchange, money=100, stocks=10)
+        self.trader_4 = Trader(exchange=self.exchange, money=100, stocks=10)
+        self.trader_5 = Trader(exchange=self.exchange, money=100, stocks=10)
 
     def test_submit_buy_order(self):
         self.trader_1.buy(100, 10)
 
         self.assertEqual(len(self.exchange.sell_levels), 0)
-        
+
         self.assertEqual(len(self.exchange.buy_levels), 1)
         buy_level = self.exchange.buy_levels[10]
-        existing_order, = buy_level
-        
+        (existing_order,) = buy_level
+
         self.assertIsInstance(existing_order, BuyOrder)
         self.assertEqual(existing_order.amount, 100)
         self.assertEqual(existing_order.price, 10)
@@ -52,10 +32,10 @@ class TestExchange(unittest.TestCase):
         self.trader_1.sell(100, 10)
 
         self.assertEqual(len(self.exchange.buy_levels), 0)
-        
+
         self.assertEqual(len(self.exchange.sell_levels), 1)
         sell_level = self.exchange.sell_levels[10]
-        existing_order, = sell_level
+        (existing_order,) = sell_level
 
         self.assertIsInstance(existing_order, SellOrder)
         self.assertEqual(existing_order.amount, 100)
@@ -68,8 +48,8 @@ class TestExchange(unittest.TestCase):
 
         self.assertEqual(len(self.exchange.buy_levels), 1)
         buy_level = self.exchange.buy_levels[10]
-        existing_order, = buy_level
-        
+        (existing_order,) = buy_level
+
         self.assertIsInstance(existing_order, BuyOrder)
         self.assertEqual(existing_order.amount, 100)
         self.assertEqual(existing_order.price, 10)
@@ -77,7 +57,7 @@ class TestExchange(unittest.TestCase):
 
         self.assertEqual(len(self.exchange.sell_levels), 1)
         sell_level = self.exchange.sell_levels[20]
-        existing_order, = sell_level
+        (existing_order,) = sell_level
 
         self.assertIsInstance(existing_order, SellOrder)
         self.assertEqual(existing_order.amount, 42)
@@ -91,7 +71,7 @@ class TestExchange(unittest.TestCase):
         self.assertEqual(len(self.exchange.sell_levels), 0)
         self.assertEqual(len(self.exchange.buy_levels), 1)
         sell_level = self.exchange.buy_levels[10]
-        existing_order, = sell_level
+        (existing_order,) = sell_level
 
         self.assertIsInstance(existing_order, BuyOrder)
         self.assertEqual(existing_order.amount, 95)
@@ -114,7 +94,7 @@ class TestExchange(unittest.TestCase):
 
         self.assertEqual(len(self.exchange.sell_levels), 1)
         sell_level = self.exchange.sell_levels[80]
-        existing_order, = sell_level
+        (existing_order,) = sell_level
 
         self.assertIsInstance(existing_order, SellOrder)
         self.assertEqual(existing_order.amount, 4)
@@ -137,7 +117,7 @@ class TestExchange(unittest.TestCase):
 
         self.assertEqual(len(self.exchange.sell_levels), 1)
         sell_level = self.exchange.sell_levels[180]
-        existing_order, = sell_level
+        (existing_order,) = sell_level
 
         self.assertIsInstance(existing_order, SellOrder)
         self.assertEqual(existing_order.amount, 5)
@@ -160,7 +140,7 @@ class TestExchange(unittest.TestCase):
         self.assertEqual(len(self.exchange.buy_levels), 1)
 
         buy_level = self.exchange.buy_levels[2]
-        existing_order, = buy_level
+        (existing_order,) = buy_level
 
         self.assertIsInstance(existing_order, BuyOrder)
         self.assertEqual(existing_order.amount, 9)
@@ -183,7 +163,7 @@ class TestExchange(unittest.TestCase):
         self.assertEqual(len(self.exchange.buy_levels), 1)
 
         buy_level = self.exchange.buy_levels[2]
-        existing_order, = buy_level
+        (existing_order,) = buy_level
 
         self.assertIsInstance(existing_order, BuyOrder)
         self.assertEqual(existing_order.amount, 10)
@@ -203,7 +183,7 @@ class TestExchange(unittest.TestCase):
         self.assertEqual(len(self.exchange.sell_levels), 1)
         self.assertEqual(len(self.exchange.buy_levels), 0)
         sell_level = self.exchange.sell_levels[80]
-        existing_order, = sell_level
+        (existing_order,) = sell_level
 
         self.assertIsInstance(existing_order, SellOrder)
         self.assertEqual(existing_order.amount, 4)
@@ -223,7 +203,7 @@ class TestExchange(unittest.TestCase):
         self.assertEqual(len(self.exchange.sell_levels), 1)
         self.assertEqual(len(self.exchange.buy_levels), 0)
         sell_level = self.exchange.sell_levels[180]
-        existing_order, = sell_level
+        (existing_order,) = sell_level
 
         self.assertIsInstance(existing_order, SellOrder)
         self.assertEqual(existing_order.amount, 5)
@@ -244,7 +224,7 @@ class TestExchange(unittest.TestCase):
 
         self.assertEqual(len(self.exchange.buy_levels), 1)
         buy_level = self.exchange.buy_levels[2]
-        existing_order, = buy_level
+        (existing_order,) = buy_level
 
         self.assertIsInstance(existing_order, BuyOrder)
         self.assertEqual(existing_order.amount, 4)
@@ -269,7 +249,7 @@ class TestExchange(unittest.TestCase):
 
         self.assertEqual(len(self.exchange.buy_levels), 1)
         buy_level = self.exchange.buy_levels[2]
-        existing_order, = buy_level
+        (existing_order,) = buy_level
 
         self.assertIsInstance(existing_order, BuyOrder)
         self.assertEqual(existing_order.amount, 5)
@@ -295,19 +275,19 @@ class TestExchange(unittest.TestCase):
 
         sell_levels = self.exchange.sell_levels
         self.assertEqual(len(sell_levels), 1)
-        
-        existing_sell_order, = sell_levels[2]
+
+        (existing_sell_order,) = sell_levels[2]
         self.assertEqual(existing_sell_order.amount, 1)
         self.assertEqual(existing_sell_order.price, 2)
         self.assertIs(existing_sell_order.owner, self.trader_4)
 
         buy_levels = self.exchange.buy_levels
         self.assertEqual(len(buy_levels), 3)
-        
+
         self.assertEqual(len(buy_levels[4]), 0)
         self.assertEqual(len(buy_levels[3]), 0)
 
-        existing_buy_order, = buy_levels[1]
+        (existing_buy_order,) = buy_levels[1]
         self.assertEqual(existing_buy_order.amount, 3)
         self.assertEqual(existing_buy_order.price, 1)
         self.assertIs(existing_buy_order.owner, self.trader_3)
@@ -333,19 +313,19 @@ class TestExchange(unittest.TestCase):
 
         buy_levels = self.exchange.buy_levels
         self.assertEqual(len(buy_levels), 1)
-        
-        existing_buy_order, = buy_levels[6]
+
+        (existing_buy_order,) = buy_levels[6]
         self.assertEqual(existing_buy_order.amount, 1)
         self.assertEqual(existing_buy_order.price, 6)
         self.assertIs(existing_buy_order.owner, self.trader_4)
 
         sell_levels = self.exchange.sell_levels
         self.assertEqual(len(sell_levels), 3)
-        
+
         self.assertEqual(len(sell_levels[4]), 0)
         self.assertEqual(len(sell_levels[5]), 0)
 
-        existing_sell_order, = sell_levels[7]
+        (existing_sell_order,) = sell_levels[7]
         self.assertEqual(existing_sell_order.amount, 3)
         self.assertEqual(existing_sell_order.price, 7)
         self.assertIs(existing_sell_order.owner, self.trader_3)

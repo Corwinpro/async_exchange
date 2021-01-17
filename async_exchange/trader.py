@@ -1,7 +1,9 @@
 from async_exchange.orders import BuyOrder, SellOrder
 
+
 class NotEnoughMoneyError(ValueError):
     pass
+
 
 class NotEnoughStocksError(ValueError):
     pass
@@ -42,14 +44,10 @@ class Trader:
         self._stocks = value
 
     def sell(self, amount, price):
-        self._exchange.process_order(
-            SellOrder(self, amount, price)
-        )
+        self._exchange.process_order(SellOrder(self, amount, price))
 
     def buy(self, amount, price):
-        self._exchange.process_order(
-            BuyOrder(self, amount, price)
-        )
+        self._exchange.process_order(BuyOrder(self, amount, price))
 
     def has_enough_money(self, money):
         if self.money < money:
