@@ -5,7 +5,7 @@ from collections import defaultdict, deque
 import logging
 
 from async_exchange.orders import BuyOrder, SellOrder
-from async_exchange.trader import NotEnoughMoneyError, NotEnoughStocksError
+from async_exchange.trader import NotEnoughMoneyError, NotEnoughStocksError, Trader
 
 logger = logging.getLogger(__name__)
 
@@ -70,6 +70,16 @@ class Exchange:
         elif isinstance(order, SellOrder):
             self._process_sell_order(order)
 
+    def _exchange_assets(self, buyer: Trader, seller: Trader, stocks: int, money: int):
+        buyer.has_enough_money(money)
+        seller.has_enough_stocks(stocks)
+
+        buyer.money -= money
+        seller.money += money
+
+        buyer.stocks += stocks
+        seller.stocks -= stocks
+
     def _process_buy_order(self, order: BuyOrder):
         current_best_sell = self.best_sell
         if current_best_sell is None or order.price < current_best_sell:
@@ -79,17 +89,16 @@ class Exchange:
             stocks_to_transfer = min(order.amount, matched_sell_order.amount)
             money_to_transfer = stocks_to_transfer * matched_sell_order.price
 
-            if (
-                matched_sell_order.owner.stocks < stocks_to_transfer
-                or order.owner.money < money_to_transfer
-            ):
+            try:
+                self._exchange_assets(
+                    order.owner,
+                    matched_sell_order.owner,
+                    stocks_to_transfer,
+                    money_to_transfer
+                )
+            except (NotEnoughMoneyError, NotEnoughStocksError) as e:
+                logger.warning(f"Could not complete exchange, {e!r}.")
                 return
-
-            matched_sell_order.owner.money += money_to_transfer
-            matched_sell_order.owner.stocks -= stocks_to_transfer
-
-            order.owner.money -= money_to_transfer
-            order.owner.stocks += stocks_to_transfer
 
             order.amount -= stocks_to_transfer
             matched_sell_order.amount -= stocks_to_transfer
@@ -107,17 +116,16 @@ class Exchange:
             stocks_to_transfer = min(order.amount, matched_buy_order.amount)
             money_to_transfer = stocks_to_transfer * matched_buy_order.price
 
-            if (
-                matched_buy_order.owner.money < money_to_transfer
-                or order.owner.stocks < stocks_to_transfer
-            ):
+            try:
+                self._exchange_assets(
+                    matched_buy_order.owner,
+                    order.owner,
+                    stocks_to_transfer,
+                    money_to_transfer
+                )
+            except (NotEnoughMoneyError, NotEnoughStocksError) as e:
+                logger.warning(f"Could not complete exchange, {e!r}.")
                 return
-
-            matched_buy_order.owner.money -= money_to_transfer
-            matched_buy_order.owner.stocks += stocks_to_transfer
-
-            order.owner.money += money_to_transfer
-            order.owner.stocks -= stocks_to_transfer
 
             order.amount -= stocks_to_transfer
             matched_buy_order.amount -= stocks_to_transfer

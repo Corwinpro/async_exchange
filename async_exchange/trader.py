@@ -51,5 +51,15 @@ class Trader:
             BuyOrder(self, amount, price)
         )
 
+    def has_enough_money(self, money):
+        if self.money < money:
+            raise NotEnoughMoneyError
+        return True
+
+    def has_enough_stocks(self, stocks):
+        if self.stocks < stocks:
+            raise NotEnoughStocksError
+        return True
+
     def __str__(self):
         return f"Trader {self._id}: stocks {self.stocks}, cash {self.money}"
