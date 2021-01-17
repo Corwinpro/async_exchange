@@ -62,15 +62,15 @@ class Exchange:
             return best_sell_price
 
     def process_order(self, order):
+        if order.amount == 0:
+            return
+
         if isinstance(order, BuyOrder):
             self._process_buy_order(order)
         elif isinstance(order, SellOrder):
             self._process_sell_order(order)
 
     def _process_buy_order(self, order: BuyOrder):
-        if order.amount == 0:
-            return
-
         current_best_sell = self.best_sell
         if current_best_sell is None or order.price < current_best_sell:
             self.buy_levels[order.price].append(order)
@@ -96,7 +96,7 @@ class Exchange:
 
             if matched_sell_order.amount == 0:
                 self.sell_levels[current_best_sell].popleft()
-            self._process_buy_order(order)
+            self.process_order(order)
 
     def _process_sell_order(self, order: SellOrder):
         current_best_buy = self.best_buy
@@ -104,59 +104,27 @@ class Exchange:
             self.sell_levels[order.price].append(order)
         else:
             matched_buy_order = self.buy_levels[current_best_buy][0]
-            if matched_buy_order.amount > order.amount:
-                stocks_to_transfer = order.amount
-                money_to_transfer = stocks_to_transfer * matched_buy_order.price
+            stocks_to_transfer = min(order.amount, matched_buy_order.amount)
+            money_to_transfer = stocks_to_transfer * matched_buy_order.price
 
-                if (
-                    matched_buy_order.owner.money < money_to_transfer
-                    or order.owner.stocks < stocks_to_transfer
-                ):
-                    return
+            if (
+                matched_buy_order.owner.money < money_to_transfer
+                or order.owner.stocks < stocks_to_transfer
+            ):
+                return
 
-                matched_buy_order.owner.money -= money_to_transfer
-                matched_buy_order.owner.stocks += stocks_to_transfer
+            matched_buy_order.owner.money -= money_to_transfer
+            matched_buy_order.owner.stocks += stocks_to_transfer
 
-                order.owner.money += money_to_transfer
-                order.owner.stocks -= stocks_to_transfer
+            order.owner.money += money_to_transfer
+            order.owner.stocks -= stocks_to_transfer
 
-                matched_buy_order.amount -= stocks_to_transfer
-            elif matched_buy_order.amount < order.amount:
-                stocks_to_transfer = matched_buy_order.amount
-                money_to_transfer = stocks_to_transfer * matched_buy_order.price
+            order.amount -= stocks_to_transfer
+            matched_buy_order.amount -= stocks_to_transfer
 
-                if (
-                    matched_buy_order.owner.money < money_to_transfer
-                    or order.owner.stocks < stocks_to_transfer
-                ):
-                    return
-                
-                matched_buy_order.owner.money -= money_to_transfer
-                matched_buy_order.owner.stocks += stocks_to_transfer
-
-                order.owner.money += money_to_transfer
-                order.owner.stocks -= stocks_to_transfer
-
-                order.amount -= stocks_to_transfer
+            if matched_buy_order.amount == 0:
                 self.buy_levels[current_best_buy].popleft()
-                self._process_buy_order(order)
-            else:
-                stocks_to_transfer = order.amount
-                money_to_transfer = stocks_to_transfer * matched_buy_order.price
-
-                if (
-                    matched_buy_order.owner.money < money_to_transfer
-                    or order.owner.stocks < stocks_to_transfer
-                ):
-                    return
-
-                matched_buy_order.owner.money -= money_to_transfer
-                matched_buy_order.owner.stocks += stocks_to_transfer
-
-                order.owner.money += money_to_transfer
-                order.owner.stocks -= stocks_to_transfer
-
-                self.buy_levels[current_best_buy].popleft()
+            self.process_order(order)
 
     def standing_orders(self, trader):
         buy_orders = tuple(
