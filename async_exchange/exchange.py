@@ -2,13 +2,18 @@ from collections import defaultdict, deque
 import logging
 
 from async_exchange.orders import BuyOrder, SellOrder
-from async_exchange.trader import NotEnoughMoneyError, NotEnoughStocksError, Trader
+from async_exchange.trader import (
+    NotEnoughMoneyError,
+    NotEnoughStocksError,
+    Trader,
+)
 
 logger = logging.getLogger(__name__)
 
 
 class Level(deque):
     pass
+
 
 class Exchange:
     def __init__(self):
@@ -67,7 +72,9 @@ class Exchange:
         elif isinstance(order, SellOrder):
             self._process_sell_order(order)
 
-    def _exchange_assets(self, buyer: Trader, seller: Trader, stocks: int, money: int):
+    def _exchange_assets(
+        self, buyer: Trader, seller: Trader, stocks: int, money: int
+    ):
         buyer.has_enough_money(money)
         seller.has_enough_stocks(stocks)
 
@@ -92,7 +99,7 @@ class Exchange:
                 order.owner,
                 matched_sell_order.owner,
                 stocks_to_transfer,
-                money_to_transfer
+                money_to_transfer,
             )
         except NotEnoughMoneyError:
             logger.warning(
@@ -100,14 +107,17 @@ class Exchange:
                 " have enough money. Adjusting the buyer's order and retrying"
                 " the exchange."
             )
-            buyer_can_afford = int(order.owner.money / matched_sell_order.price)
+            buyer_can_afford = int(
+                order.owner.money / matched_sell_order.price
+            )
             order.amount = buyer_can_afford
             self.process_order(order)
         except NotEnoughStocksError:
+            _seller = matched_sell_order.owner
             logger.warning(
-                f"Could not complete exchange: seller {matched_sell_order.owner}"
-                " does not have enough stocks. Adjusting the seller's order and "
-                "retrying the exchange."
+                f"Could not complete exchange: seller {_seller}"
+                " does not have enough stocks. Adjusting the seller's order "
+                "and retrying the exchange."
             )
             matched_sell_order.amount = matched_sell_order.owner.stocks
             self.process_order(order)
@@ -134,7 +144,7 @@ class Exchange:
                 matched_buy_order.owner,
                 order.owner,
                 stocks_to_transfer,
-                money_to_transfer
+                money_to_transfer,
             )
         except NotEnoughMoneyError:
             logger.warning(
@@ -150,8 +160,8 @@ class Exchange:
         except NotEnoughStocksError:
             logger.warning(
                 f"Could not complete exchange: seller {order.owner}"
-                " does not have enough stocks. Adjusting the seller's order and "
-                "retrying the exchange."
+                " does not have enough stocks. Adjusting the seller's order "
+                "and retrying the exchange."
             )
             order.amount = order.owner.stocks
             self.process_order(order)
