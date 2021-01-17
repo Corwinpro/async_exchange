@@ -88,9 +88,7 @@ class TestExchange(unittest.TestCase):
         self.trader_1.buy(5, 80)
         self.trader_2.sell(5, 80)
 
-        self.assertEqual(len(self.exchange.buy_levels), 1)
-        empty_buy_level = self.exchange.buy_levels[80]
-        self.assertEqual(len(empty_buy_level), 0)
+        self.assertEqual(len(self.exchange.buy_levels), 0)
 
         self.assertEqual(len(self.exchange.sell_levels), 1)
         sell_level = self.exchange.sell_levels[80]
@@ -111,9 +109,7 @@ class TestExchange(unittest.TestCase):
         self.trader_1.buy(5, 180)
         self.trader_2.sell(5, 180)
 
-        self.assertEqual(len(self.exchange.buy_levels), 1)
-        empty_buy_level = self.exchange.buy_levels[180]
-        self.assertEqual(len(empty_buy_level), 0)
+        self.assertEqual(len(self.exchange.buy_levels), 0)
 
         self.assertEqual(len(self.exchange.sell_levels), 1)
         sell_level = self.exchange.sell_levels[180]
@@ -231,9 +227,7 @@ class TestExchange(unittest.TestCase):
         self.assertEqual(existing_order.price, 2)
         self.assertIs(existing_order.owner, self.trader_2)
 
-        self.assertEqual(len(self.exchange.sell_levels), 1)
-        sell_level = self.exchange.sell_levels[2]
-        self.assertEqual(len(sell_level), 0)
+        self.assertEqual(len(self.exchange.sell_levels), 0)
 
         self.assertEqual(self.trader_1.money, 102)
         self.assertEqual(self.trader_2.money, 98)
@@ -256,9 +250,7 @@ class TestExchange(unittest.TestCase):
         self.assertEqual(existing_order.price, 2)
         self.assertIs(existing_order.owner, self.trader_2)
 
-        self.assertEqual(len(self.exchange.sell_levels), 1)
-        sell_level = self.exchange.sell_levels[2]
-        self.assertEqual(len(sell_level), 0)
+        self.assertEqual(len(self.exchange.sell_levels), 0)
 
         self.assertEqual(self.trader_1.money, 100)
         self.assertEqual(self.trader_2.money, 100)
@@ -282,7 +274,7 @@ class TestExchange(unittest.TestCase):
         self.assertIs(existing_sell_order.owner, self.trader_4)
 
         buy_levels = self.exchange.buy_levels
-        self.assertEqual(len(buy_levels), 3)
+        self.assertEqual(len(buy_levels), 1)
 
         self.assertEqual(len(buy_levels[4]), 0)
         self.assertEqual(len(buy_levels[3]), 0)
@@ -320,10 +312,7 @@ class TestExchange(unittest.TestCase):
         self.assertIs(existing_buy_order.owner, self.trader_4)
 
         sell_levels = self.exchange.sell_levels
-        self.assertEqual(len(sell_levels), 3)
-
-        self.assertEqual(len(sell_levels[4]), 0)
-        self.assertEqual(len(sell_levels[5]), 0)
+        self.assertEqual(len(sell_levels), 1)
 
         (existing_sell_order,) = sell_levels[7]
         self.assertEqual(existing_sell_order.amount, 3)
