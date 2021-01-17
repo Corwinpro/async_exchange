@@ -12,3 +12,4 @@ async_exchange.egg-info/
 exchange-py39/
 .vscode/
 __pycache__/
+.coverage
