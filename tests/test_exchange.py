@@ -18,6 +18,21 @@ class TestExchange(unittest.TestCase):
             money=100,
             stocks=10
         )
+        self.trader_3 = Trader(
+            exchange=self.exchange,
+            money=100,
+            stocks=10
+        )
+        self.trader_4 = Trader(
+            exchange=self.exchange,
+            money=100,
+            stocks=10
+        )
+        self.trader_5 = Trader(
+            exchange=self.exchange,
+            money=100,
+            stocks=10
+        )
 
     def test_submit_buy_order(self):
         self.trader_1.buy(100, 10)
@@ -270,6 +285,82 @@ class TestExchange(unittest.TestCase):
 
         self.assertEqual(self.trader_1.stocks, 0)
         self.assertEqual(self.trader_2.stocks, 10)
+
+    def test_sell_below_ask_price(self):
+        self.trader_1.buy(1, 4)
+        self.trader_2.buy(2, 3)
+        self.trader_3.buy(3, 1)
+
+        self.trader_4.sell(4, 2)
+
+        sell_levels = self.exchange.sell_levels
+        self.assertEqual(len(sell_levels), 1)
+        
+        existing_sell_order, = sell_levels[2]
+        self.assertEqual(existing_sell_order.amount, 1)
+        self.assertEqual(existing_sell_order.price, 2)
+        self.assertIs(existing_sell_order.owner, self.trader_4)
+
+        buy_levels = self.exchange.buy_levels
+        self.assertEqual(len(buy_levels), 3)
+        
+        self.assertEqual(len(buy_levels[4]), 0)
+        self.assertEqual(len(buy_levels[3]), 0)
+
+        existing_buy_order, = buy_levels[1]
+        self.assertEqual(existing_buy_order.amount, 3)
+        self.assertEqual(existing_buy_order.price, 1)
+        self.assertIs(existing_buy_order.owner, self.trader_3)
+
+        self.assertEqual(self.trader_1.stocks, 11)
+        self.assertEqual(self.trader_1.money, 96)
+
+        self.assertEqual(self.trader_2.stocks, 12)
+        self.assertEqual(self.trader_2.money, 94)
+
+        self.assertEqual(self.trader_3.stocks, 10)
+        self.assertEqual(self.trader_3.money, 100)
+
+        self.assertEqual(self.trader_4.stocks, 7)
+        self.assertEqual(self.trader_4.money, 110)
+
+    def test_buy_above_sell_price(self):
+        self.trader_1.sell(1, 4)
+        self.trader_2.sell(2, 5)
+        self.trader_3.sell(3, 7)
+
+        self.trader_4.buy(4, 6)
+
+        buy_levels = self.exchange.buy_levels
+        self.assertEqual(len(buy_levels), 1)
+        
+        existing_buy_order, = buy_levels[6]
+        self.assertEqual(existing_buy_order.amount, 1)
+        self.assertEqual(existing_buy_order.price, 6)
+        self.assertIs(existing_buy_order.owner, self.trader_4)
+
+        sell_levels = self.exchange.sell_levels
+        self.assertEqual(len(sell_levels), 3)
+        
+        self.assertEqual(len(sell_levels[4]), 0)
+        self.assertEqual(len(sell_levels[5]), 0)
+
+        existing_sell_order, = sell_levels[7]
+        self.assertEqual(existing_sell_order.amount, 3)
+        self.assertEqual(existing_sell_order.price, 7)
+        self.assertIs(existing_sell_order.owner, self.trader_3)
+
+        self.assertEqual(self.trader_1.stocks, 9)
+        self.assertEqual(self.trader_1.money, 104)
+
+        self.assertEqual(self.trader_2.stocks, 8)
+        self.assertEqual(self.trader_2.money, 110)
+
+        self.assertEqual(self.trader_3.stocks, 10)
+        self.assertEqual(self.trader_3.money, 100)
+
+        self.assertEqual(self.trader_4.stocks, 13)
+        self.assertEqual(self.trader_4.money, 86)
 
 
 if __name__ == "__main__":
