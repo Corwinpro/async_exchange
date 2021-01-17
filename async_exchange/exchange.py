@@ -84,22 +84,37 @@ class Exchange:
         current_best_sell = self.best_sell
         if current_best_sell is None or order.price < current_best_sell:
             self.buy_levels[order.price].append(order)
+            return
+
+        matched_sell_order = self.sell_levels[current_best_sell][0]
+        stocks_to_transfer = min(order.amount, matched_sell_order.amount)
+        money_to_transfer = stocks_to_transfer * matched_sell_order.price
+
+        try:
+            self._exchange_assets(
+                order.owner,
+                matched_sell_order.owner,
+                stocks_to_transfer,
+                money_to_transfer
+            )
+        except NotEnoughMoneyError:
+            logger.warning(
+                f"Could not complete exchange: buyer {order.owner} does not"
+                " have enough money. Adjusting the buyer's order and retrying"
+                " the exchange."
+            )
+            buyer_can_afford = int(order.owner.money / matched_sell_order.price)
+            order.amount = buyer_can_afford
+            self.process_order(order)
+        except NotEnoughStocksError:
+            logger.warning(
+                f"Could not complete exchange: seller {matched_sell_order.owner}"
+                " does not have enough stocks. Adjusting the seller's order and "
+                "retrying the exchange."
+            )
+            matched_sell_order.amount = matched_sell_order.owner.stocks
+            self.process_order(order)
         else:
-            matched_sell_order = self.sell_levels[current_best_sell][0]
-            stocks_to_transfer = min(order.amount, matched_sell_order.amount)
-            money_to_transfer = stocks_to_transfer * matched_sell_order.price
-
-            try:
-                self._exchange_assets(
-                    order.owner,
-                    matched_sell_order.owner,
-                    stocks_to_transfer,
-                    money_to_transfer
-                )
-            except (NotEnoughMoneyError, NotEnoughStocksError) as e:
-                logger.warning(f"Could not complete exchange, {e!r}.")
-                return
-
             order.amount -= stocks_to_transfer
             matched_sell_order.amount -= stocks_to_transfer
 
@@ -111,22 +126,39 @@ class Exchange:
         current_best_buy = self.best_buy
         if current_best_buy is None or order.price > current_best_buy:
             self.sell_levels[order.price].append(order)
+            return
+
+        matched_buy_order = self.buy_levels[current_best_buy][0]
+        stocks_to_transfer = min(order.amount, matched_buy_order.amount)
+        money_to_transfer = stocks_to_transfer * matched_buy_order.price
+
+        try:
+            self._exchange_assets(
+                matched_buy_order.owner,
+                order.owner,
+                stocks_to_transfer,
+                money_to_transfer
+            )
+        except NotEnoughMoneyError:
+            logger.warning(
+                f"Could not complete exchange: buyer {matched_buy_order.owner}"
+                "  does not have enough money. Adjusting the buyer's order and"
+                " retrying the exchange."
+            )
+            buyer_can_afford = int(
+                matched_buy_order.owner.money / matched_buy_order.price
+            )
+            matched_buy_order.amount = buyer_can_afford
+            self.process_order(order)
+        except NotEnoughStocksError:
+            logger.warning(
+                f"Could not complete exchange: seller {order.owner}"
+                " does not have enough stocks. Adjusting the seller's order and "
+                "retrying the exchange."
+            )
+            order.amount = order.owner.stocks
+            self.process_order(order)
         else:
-            matched_buy_order = self.buy_levels[current_best_buy][0]
-            stocks_to_transfer = min(order.amount, matched_buy_order.amount)
-            money_to_transfer = stocks_to_transfer * matched_buy_order.price
-
-            try:
-                self._exchange_assets(
-                    matched_buy_order.owner,
-                    order.owner,
-                    stocks_to_transfer,
-                    money_to_transfer
-                )
-            except (NotEnoughMoneyError, NotEnoughStocksError) as e:
-                logger.warning(f"Could not complete exchange, {e!r}.")
-                return
-
             order.amount -= stocks_to_transfer
             matched_buy_order.amount -= stocks_to_transfer
 
