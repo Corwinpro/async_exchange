@@ -127,6 +127,8 @@ class Exchange:
 
             if matched_sell_order.amount == 0:
                 self.sell_levels[current_best_sell].popleft()
+                if len(self.sell_levels[current_best_sell]) == 0:
+                    self.sell_levels.pop(current_best_sell)
             self.process_order(order)
 
     def _process_sell_order(self, order: SellOrder):
@@ -171,6 +173,8 @@ class Exchange:
 
             if matched_buy_order.amount == 0:
                 self.buy_levels[current_best_buy].popleft()
+                if len(self.buy_levels[current_best_buy]) == 0:
+                    self.buy_levels.pop(current_best_buy)
             self.process_order(order)
 
     def standing_orders(self, trader):
