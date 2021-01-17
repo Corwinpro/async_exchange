@@ -12,11 +12,11 @@ class NotEnoughStocksError(ValueError):
 class Trader:
     _id = 1
 
-    def __init__(self, exchange, money=100, stocks=10):
+    def __init__(self, exchange_api, money=100, stocks=10):
         self._money = None
         self._stocks = None
 
-        self._exchange = exchange
+        self._exchange_api = exchange_api
 
         self.money = money
         self.stocks = stocks
@@ -44,10 +44,10 @@ class Trader:
         self._stocks = value
 
     def sell(self, amount, price):
-        self._exchange.process_order(SellOrder(self, amount, price))
+        self._exchange_api.process_order(SellOrder(self, amount, price))
 
     def buy(self, amount, price):
-        self._exchange.process_order(BuyOrder(self, amount, price))
+        self._exchange_api.process_order(BuyOrder(self, amount, price))
 
     def has_enough_money(self, money):
         if self.money < money:
