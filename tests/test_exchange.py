@@ -362,6 +362,36 @@ class TestExchange(unittest.TestCase):
         self.assertEqual(self.trader_4.stocks, 13)
         self.assertEqual(self.trader_4.money, 86)
 
+    def test_buy_orders_ordered(self):
+        self.trader_1.buy(2, 1)
+        self.trader_2.buy(3, 1)
+
+        self.trader_3.sell(1, 1)
+
+        self.assertEqual(self.trader_1.stocks, 11)
+        self.assertEqual(self.trader_1.money, 99)
+
+        self.assertEqual(self.trader_2.stocks, 10)
+        self.assertEqual(self.trader_2.money, 100)
+
+        self.assertEqual(self.trader_3.stocks, 9)
+        self.assertEqual(self.trader_3.money, 101)
+
+    def test_sell_orders_ordered(self):
+        self.trader_1.sell(2, 1)
+        self.trader_2.sell(3, 1)
+
+        self.trader_3.buy(1, 1)
+
+        self.assertEqual(self.trader_1.stocks, 9)
+        self.assertEqual(self.trader_1.money, 101)
+
+        self.assertEqual(self.trader_2.stocks, 10)
+        self.assertEqual(self.trader_2.money, 100)
+
+        self.assertEqual(self.trader_3.stocks, 11)
+        self.assertEqual(self.trader_3.money, 99)
+
 
 if __name__ == "__main__":
     unittest.main()
