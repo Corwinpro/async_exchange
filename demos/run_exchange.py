@@ -18,4 +18,3 @@ if __name__ == "__main__":
 
     trader_1.buy(40, 5)
     print(exchange)
-    
