@@ -22,7 +22,7 @@ class Exchange:
 
     def __repr__(self):
         _repr = "\n______________\n"
-        _repr += "Buy   |   Sell  vol\n      |\n"
+        _repr += "Buy   |   Sell  price\n      |\n"
         _repr += "\n".join(
             f"      |- {sum(order.amount for order in level):4}   {price}"
             for price, level in sorted(self.sell_levels.items(), reverse=True)
@@ -30,7 +30,7 @@ class Exchange:
         )
         _repr += "\n------+-------\n"
         _repr += "\n".join(
-            f"{sum(order.amount for order in level):4} -|  {price:8}"
+            f"{sum(order.amount for order in level):4} -|   {price:8}"
             for price, level in sorted(self.buy_levels.items(), reverse=True)
             if sum(order.amount for order in level) > 0
         )
@@ -195,11 +195,11 @@ class Exchange:
     def get_orderbook(self):
         buy_orders = {
             price: sum(order.amount for order in level)
-            for price, level in self.buy_levels
+            for price, level in self.buy_levels.items()
         }
         sell_orders = {
             price: sum(order.amount for order in level)
-            for price, level in self.sell_levels
+            for price, level in self.sell_levels.items()
         }
         return buy_orders, sell_orders
 
