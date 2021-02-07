@@ -1,20 +1,22 @@
-from async_exchange.api import Exchange, Trader
+import asyncio
+
+from async_exchange.api import Exchange
+from async_exchange.algorithms.random_trader import RandomTrader
+
+
+NOF_TRADERS = 100
+
+
+async def main():
+    exchange = Exchange()
+    api = exchange.api
+    tasks = [
+        RandomTrader(exchange_api=api, money=300, stocks=10).cycle()
+        for _ in range(NOF_TRADERS)
+    ]
+    group = asyncio.gather(*tasks, return_exceptions=True)
+    await group
+
 
 if __name__ == "__main__":
-
-    exchange = Exchange()
-
-    trader_1 = Trader(exchange=exchange)
-    trader_2 = Trader(exchange=exchange)
-
-    trader_1.sell(30, 4)
-    trader_1.sell(50, 5)
-    trader_1.sell(5, 3)
-    trader_2.buy(100, 1)
-    print(exchange)
-
-    trader_2.buy(40, 2)
-    print(exchange)
-
-    trader_1.buy(40, 5)
-    print(exchange)
+    asyncio.run(main())
