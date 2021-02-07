@@ -1,6 +1,6 @@
 import unittest
 
-from async_exchange.exchange import Exchange
+from async_exchange.exchange import Exchange, ExchangeAPI
 from async_exchange.trader import Trader
 from async_exchange.orders import BuyOrder, SellOrder
 
@@ -8,11 +8,12 @@ from async_exchange.orders import BuyOrder, SellOrder
 class TestExchange(unittest.TestCase):
     def setUp(self):
         self.exchange = Exchange()
-        self.trader_1 = Trader(exchange=self.exchange, money=100, stocks=10)
-        self.trader_2 = Trader(exchange=self.exchange, money=100, stocks=10)
-        self.trader_3 = Trader(exchange=self.exchange, money=100, stocks=10)
-        self.trader_4 = Trader(exchange=self.exchange, money=100, stocks=10)
-        self.trader_5 = Trader(exchange=self.exchange, money=100, stocks=10)
+        api = self.exchange.api
+        self.trader_1 = Trader(exchange_api=api, money=100, stocks=10)
+        self.trader_2 = Trader(exchange_api=api, money=100, stocks=10)
+        self.trader_3 = Trader(exchange_api=api, money=100, stocks=10)
+        self.trader_4 = Trader(exchange_api=api, money=100, stocks=10)
+        self.trader_5 = Trader(exchange_api=api, money=100, stocks=10)
 
     def test_submit_buy_order(self):
         self.trader_1.buy(100, 10)
@@ -360,6 +361,20 @@ class TestExchange(unittest.TestCase):
 
         self.assertEqual(self.trader_3.stocks, 11)
         self.assertEqual(self.trader_3.money, 99)
+
+
+class TestExchangeAPI(unittest.TestCase):
+    def setUp(self):
+        self.exchange = Exchange()
+        self.api = self.exchange.api
+
+    def test_exchange_api(self):
+        self.assertIsInstance(self.api, ExchangeAPI)
+        self.assertEqual(self.api.process_order, self.exchange.process_order)
+        self.assertEqual(
+            self.api.standing_orders, self.exchange.standing_orders
+        )
+        self.assertEqual(self.api.get_orderbook, self.exchange.get_orderbook)
 
 
 if __name__ == "__main__":

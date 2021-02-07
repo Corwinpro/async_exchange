@@ -191,3 +191,37 @@ class Exchange:
             if order.owner is trader
         )
         return buy_orders, sell_orders
+
+    def get_orderbook(self):
+        buy_orders = {
+            price: sum(order.amount for order in level)
+            for price, level in self.buy_levels
+        }
+        sell_orders = {
+            price: sum(order.amount for order in level)
+            for price, level in self.sell_levels
+        }
+        return buy_orders, sell_orders
+
+    @property
+    def api(self):
+        return ExchangeAPI(exchange=self)
+
+
+class ExchangeAPI:
+    def __init__(self, exchange: Exchange):
+        self._process_order = exchange.process_order
+        self._standing_orders = exchange.standing_orders
+        self._get_order_book = exchange.get_orderbook
+
+    @property
+    def process_order(self):
+        return self._process_order
+
+    @property
+    def standing_orders(self):
+        return self._standing_orders
+
+    @property
+    def get_orderbook(self):
+        return self._get_order_book
