@@ -1,5 +1,6 @@
 from collections import defaultdict, deque
 import logging
+import time
 
 from async_exchange.orders import BuyOrder, SellOrder
 from async_exchange.trader import (
@@ -75,6 +76,9 @@ class Exchange:
     def _exchange_assets(
         self, buyer: Trader, seller: Trader, stocks: int, money: int
     ):
+        if stocks == 0:
+            return
+
         buyer.has_enough_money(money)
         seller.has_enough_stocks(stocks)
 
@@ -83,6 +87,16 @@ class Exchange:
 
         buyer.stocks += stocks
         seller.stocks -= stocks
+
+        with open("stats.csv", "a") as f:
+            current_time = time.time()
+            f.write(f"{current_time}, {money/stocks}, {stocks}\n")
+        
+        with open(f"traderstats_{buyer._id}.csv", "a") as f:
+            f.write(f"{current_time}, {buyer.money}\n")
+
+        with open(f"traderstats_{seller._id}.csv", "a") as f:
+            f.write(f"{current_time}, {seller.money}\n")
 
     def _process_buy_order(self, order: BuyOrder):
         current_best_sell = self.best_sell

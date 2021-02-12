@@ -14,7 +14,7 @@ async def main():
         RandomTrader(exchange_api=api, money=300, stocks=10).cycle()
         for _ in range(NOF_TRADERS)
     ]
-    group = asyncio.gather(*tasks, return_exceptions=True)
+    group = asyncio.gather(*tasks, return_exceptions=False)
     await group
 
 

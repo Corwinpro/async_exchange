@@ -44,7 +44,7 @@ class RandomTrader(Trader):
         random_price = median_price + random.randint(-deviation, deviation)
 
         if buy_or_sell == BUY:
-            max_stocks = self.money // random_price
+            max_stocks = self.money // max(1, random_price)
         else:
             max_stocks = self.stocks
 
