@@ -59,5 +59,8 @@ class Trader:
             raise NotEnoughStocksError
         return True
 
+    def inspect_exchange(self):
+        return self._exchange_api.get_orderbook()
+
     def __str__(self):
         return f"Trader {self._id}: stocks {self.stocks}, cash {self.money}"
