@@ -88,16 +88,6 @@ class Exchange:
         buyer.stocks += stocks
         seller.stocks -= stocks
 
-        with open("stats.csv", "a") as f:
-            current_time = time.time()
-            f.write(f"{current_time}, {money/stocks}, {stocks}\n")
-        
-        with open(f"traderstats_{buyer._id}.csv", "a") as f:
-            f.write(f"{current_time}, {buyer.money}\n")
-
-        with open(f"traderstats_{seller._id}.csv", "a") as f:
-            f.write(f"{current_time}, {seller.money}\n")
-
     def _process_buy_order(self, order: BuyOrder):
         current_best_sell = self.best_sell
         if current_best_sell is None or order.price < current_best_sell:
