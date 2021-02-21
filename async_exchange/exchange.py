@@ -24,9 +24,7 @@ class Exchange:
 
     def log_event(self, event_type, message):
         if self._logger is not None:
-            self._logger.send_event(
-                record_type=event_type, message=message
-            )
+            self._logger.send_event(record_type=event_type, message=message)
 
     def __repr__(self):
         _repr = "\n______________\n"
@@ -97,7 +95,7 @@ class Exchange:
 
         self.log_event(
             event_type="exchange",
-            message={"price": money / stocks, "amount": stocks}
+            message={"price": money / stocks, "amount": stocks},
         )
 
     def _process_buy_order(self, order: BuyOrder):

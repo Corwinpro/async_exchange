@@ -48,7 +48,7 @@ class InfluxDBLogger:
             {
                 TIME_FIELD: datetime.datetime.now().isoformat(),
                 RECORD_TYPE_FIELD: record_type,
-                FIELDS_TYPE_FIELD: record_field
+                FIELDS_TYPE_FIELD: record_field,
             }
             for record_field in record_fields
         ]
