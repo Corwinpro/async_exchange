@@ -1,0 +1,21 @@
+influxdb:
+  image: influxdb:latest
+  container_name: influxdb
+  ports:
+    - 8086:8086
+  volumes:
+    - /tmp/exchange/influxdb:/var/lib/influxdb
+  restart:
+    always
+
+grafana:
+  image: grafana/grafana
+  container_name: grafana
+  ports:
+    - 3001:3000
+  volumes:
+    - /tmp/exchange/grafana:/var/lib/grafana
+  restart:
+    always
+  environment:
+    - GF_INSTALL_PLUGINS=https://github.com/ilgizar/ilgizar-candlestick-panel/raw/master/pack/ilgizar-candlestick-panel.zip;ilgizar-candlestick-panel
