@@ -1,0 +1,319 @@
+{
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": "-- Grafana --",
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "type": "dashboard"
+        }
+      ]
+    },
+    "editable": true,
+    "gnetId": null,
+    "graphTooltip": 0,
+    "id": 1,
+    "links": [],
+    "panels": [
+      {
+        "barColor": "#000000",
+        "bearColor": "#ff4a3a",
+        "bullColor": "#26ff42",
+        "candlestickWidth": 9,
+        "colorizeTooltip": true,
+        "datasource": null,
+        "description": "",
+        "dojiColor": "#c8c9ca",
+        "fieldConfig": {
+          "defaults": {
+            "color": {},
+            "custom": {},
+            "thresholds": {
+              "mode": "absolute",
+              "steps": []
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 12,
+          "w": 24,
+          "x": 0,
+          "y": 0
+        },
+        "id": 2,
+        "indicators": [],
+        "labelY1": null,
+        "labelY2": null,
+        "maxDataPoints": 80,
+        "mode": "color",
+        "pluginVersion": "7.4.2",
+        "seriesOverrides": [
+          {
+            "alias": "exchange.mean",
+            "color": "#7EB26D",
+            "fill": 0,
+            "linewidth": 1
+          },
+          {
+            "alias": "exchange.alias",
+            "color": "#EAB839",
+            "fill": 0,
+            "linewidth": 1
+          },
+          {
+            "alias": "exchange.volume",
+            "color": "#6ED0E0",
+            "fill": 0,
+            "linewidth": 1
+          },
+          {
+            "alias": "volume",
+            "color": "#EF843C",
+            "fill": 0,
+            "linewidth": 1
+          }
+        ],
+        "solidColor": "#000000",
+        "swapYaxes": true,
+        "targets": [
+          {
+            "alias": "open",
+            "groupBy": [
+              {
+                "params": [
+                  "10s"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "linear"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "exchange",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "query": "SELECT first(\"price\") AS \"open\" FROM \"exchange\" WHERE $timeFilter GROUP BY time(10s) fill(linear)",
+            "rawQuery": true,
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "price"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "first"
+                },
+                {
+                  "params": [
+                    "open"
+                  ],
+                  "type": "alias"
+                }
+              ]
+            ],
+            "tags": []
+          },
+          {
+            "alias": "close",
+            "groupBy": [
+              {
+                "params": [
+                  "$__interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "null"
+                ],
+                "type": "fill"
+              }
+            ],
+            "hide": false,
+            "orderByTime": "ASC",
+            "policy": "default",
+            "query": "SELECT last(\"price\") AS \"close\" FROM \"exchange\" WHERE $timeFilter GROUP BY time(10s) fill(linear)",
+            "rawQuery": true,
+            "refId": "B",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "value"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "mean"
+                }
+              ]
+            ],
+            "tags": []
+          },
+          {
+            "alias": "low",
+            "groupBy": [
+              {
+                "params": [
+                  "$__interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "null"
+                ],
+                "type": "fill"
+              }
+            ],
+            "hide": false,
+            "orderByTime": "ASC",
+            "policy": "default",
+            "query": "SELECT min(\"price\") AS \"low\" FROM \"exchange\" WHERE $timeFilter GROUP BY time(10s) fill(linear)",
+            "rawQuery": true,
+            "refId": "C",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "value"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "mean"
+                }
+              ]
+            ],
+            "tags": []
+          },
+          {
+            "alias": "high",
+            "groupBy": [
+              {
+                "params": [
+                  "$__interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "null"
+                ],
+                "type": "fill"
+              }
+            ],
+            "hide": false,
+            "orderByTime": "ASC",
+            "policy": "default",
+            "query": "SELECT max(\"price\") AS \"high\" FROM \"exchange\" WHERE $timeFilter GROUP BY time(10s) fill(linear)",
+            "rawQuery": true,
+            "refId": "D",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "value"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "mean"
+                }
+              ]
+            ],
+            "tags": []
+          },
+          {
+            "alias": "volume",
+            "groupBy": [
+              {
+                "params": [
+                  "10s"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "linear"
+                ],
+                "type": "fill"
+              }
+            ],
+            "hide": false,
+            "measurement": "exchange",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "E",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "amount"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "mean"
+                },
+                {
+                  "params": [
+                    "volume"
+                  ],
+                  "type": "alias"
+                }
+              ]
+            ],
+            "tags": []
+          }
+        ],
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Exchange",
+        "tooltipFormat": "YYYY-MM-DD HH:mm:ss",
+        "transparentTooltip": false,
+        "type": "ilgizar-candlestick-panel",
+        "widthMode": "auto"
+      }
+    ],
+    "refresh": "10s",
+    "schemaVersion": 27,
+    "style": "dark",
+    "tags": [],
+    "templating": {
+      "list": []
+    },
+    "time": {
+      "from": "now-15m",
+      "to": "now"
+    },
+    "timepicker": {
+      "refresh_intervals": [
+        "10s"
+      ]
+    },
+    "timezone": "",
+    "title": "Exchange",
+    "uid": "a3lQxRyGz",
+    "version": 14
+  }
