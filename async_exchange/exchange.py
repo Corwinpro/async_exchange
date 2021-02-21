@@ -1,6 +1,5 @@
 from collections import defaultdict, deque
 import logging
-import time
 
 from async_exchange.orders import BuyOrder, SellOrder
 from async_exchange.trader import (
@@ -17,9 +16,17 @@ class Level(deque):
 
 
 class Exchange:
-    def __init__(self):
+    def __init__(self, logger=None):
         self.buy_levels = defaultdict(Level)
         self.sell_levels = defaultdict(Level)
+
+        self._logger = logger
+
+    def log_event(self, event_type, message):
+        if self._logger is not None:
+            self._logger.send_event(
+                record_type=event_type, message=message
+            )
 
     def __repr__(self):
         _repr = "\n______________\n"
@@ -87,6 +94,11 @@ class Exchange:
 
         buyer.stocks += stocks
         seller.stocks -= stocks
+
+        self.log_event(
+            event_type="exchange",
+            message={"price": money / stocks, "amount": stocks}
+        )
 
     def _process_buy_order(self, order: BuyOrder):
         current_best_sell = self.best_sell
