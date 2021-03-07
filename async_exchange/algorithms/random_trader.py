@@ -1,8 +1,10 @@
 import asyncio
+import logging
 import random
 
 from async_exchange.trader import Trader
 
+logger = logging.getLogger(__name__)
 
 BUY = "BUY"
 SELL = "SELL"
@@ -11,6 +13,8 @@ DEFAULT_PRICE = 10
 
 
 class RandomTrader(Trader):
+    verbose = False
+
     async def sleep(self):
         sleep_time = random.random() * 1.0
         await asyncio.sleep(sleep_time)
@@ -63,10 +67,11 @@ class RandomTrader(Trader):
         if amount is None:
             amount = random.randint(1, self.money // price)
 
-        print(
-            f"Trader {self._id} wants to {buy_or_sell} "
-            f"{amount} stocks at {price}."
-        )
+        if self.verbose:
+            logger.info(
+                f"Trader {self._id} wants to {buy_or_sell} "
+                f"{amount} stocks at {price}."
+            )
         if buy_or_sell == BUY:
             operation = self.buy
         else:

@@ -9,6 +9,7 @@ from async_exchange.trader import (
 )
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.ERROR)
 
 
 class Level(deque):
@@ -99,6 +100,9 @@ class Exchange:
         )
 
     def _process_buy_order(self, order: BuyOrder):
+        if order.amount <= 0:
+            return
+
         current_best_sell = self.best_sell
         if current_best_sell is None or order.price < current_best_sell:
             self.buy_levels[order.price].append(order)
@@ -125,7 +129,7 @@ class Exchange:
                 order.owner.money / matched_sell_order.price
             )
             order.amount = buyer_can_afford
-            self.process_order(order)
+            self._process_buy_order(order)
         except NotEnoughStocksError:
             _seller = matched_sell_order.owner
             logger.warning(
@@ -134,7 +138,7 @@ class Exchange:
                 "and retrying the exchange."
             )
             matched_sell_order.amount = matched_sell_order.owner.stocks
-            self.process_order(order)
+            self._process_buy_order(order)
         else:
             order.amount -= stocks_to_transfer
             matched_sell_order.amount -= stocks_to_transfer
@@ -143,9 +147,12 @@ class Exchange:
                 self.sell_levels[current_best_sell].popleft()
                 if len(self.sell_levels[current_best_sell]) == 0:
                     self.sell_levels.pop(current_best_sell)
-            self.process_order(order)
+            self._process_buy_order(order)
 
     def _process_sell_order(self, order: SellOrder):
+        if order.amount <= 0:
+            return
+
         current_best_buy = self.best_buy
         if current_best_buy is None or order.price > current_best_buy:
             self.sell_levels[order.price].append(order)
@@ -172,7 +179,7 @@ class Exchange:
                 matched_buy_order.owner.money / matched_buy_order.price
             )
             matched_buy_order.amount = buyer_can_afford
-            self.process_order(order)
+            self._process_sell_order(order)
         except NotEnoughStocksError:
             logger.warning(
                 f"Could not complete exchange: seller {order.owner}"
@@ -180,7 +187,7 @@ class Exchange:
                 "and retrying the exchange."
             )
             order.amount = order.owner.stocks
-            self.process_order(order)
+            self._process_sell_order(order)
         else:
             order.amount -= stocks_to_transfer
             matched_buy_order.amount -= stocks_to_transfer
@@ -189,7 +196,7 @@ class Exchange:
                 self.buy_levels[current_best_buy].popleft()
                 if len(self.buy_levels[current_best_buy]) == 0:
                     self.buy_levels.pop(current_best_buy)
-            self.process_order(order)
+            self._process_sell_order(order)
 
     def standing_orders(self, trader):
         buy_orders = tuple(
