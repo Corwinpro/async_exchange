@@ -1,21 +1,33 @@
-influxdb:
-  image: influxdb:latest
-  container_name: influxdb
-  ports:
-    - 8086:8086
-  volumes:
-    - /tmp/exchange/influxdb:/var/lib/influxdb
-  restart:
-    always
+version: '3'
+services:
+  influxdb:
+    image: influxdb:latest
+    container_name: influxdb
+    ports:
+      - 8086:8086
+    volumes:
+      - /tmp/exchange/influxdb:/var/lib/influxdb
+    restart:
+      always
 
-grafana:
-  image: grafana/grafana
-  container_name: grafana
-  ports:
-    - 3001:3000
-  volumes:
-    - /tmp/exchange/grafana:/var/lib/grafana
-  restart:
-    always
-  environment:
-    - GF_INSTALL_PLUGINS=https://github.com/ilgizar/ilgizar-candlestick-panel/raw/master/pack/ilgizar-candlestick-panel.zip;ilgizar-candlestick-panel
+  influxdb_cli:
+    links:
+      - influxdb
+    image: influxdb:latest
+    entrypoint: influx setup --bucket async_exchange_bucket -t async_exchange_token -o async_exchange_org --username=myusername --password=passwordpasswordpassword --host=http://influxdb:8086 -f
+      # Wait for the influxd service in the influxdb container has fully bootstrapped before trying to setup an influxdb instance with the influxdb_cli service. 
+    restart: on-failure:10
+    depends_on:
+      - influxdb
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - 3001:3000
+    volumes:
+      - /tmp/exchange/grafana:/var/lib/grafana
+    restart:
+      always
+    environment:
+      - GF_INSTALL_PLUGINS=https://github.com/ilgizar/ilgizar-candlestick-panel/raw/master/pack/ilgizar-candlestick-panel.zip;ilgizar-candlestick-panel

@@ -1,35 +1,34 @@
 from collections import defaultdict
 import datetime
-from influxdb import InfluxDBClient
+from influxdb_client import InfluxDBClient, Point
+from influxdb_client.client.write_api import SYNCHRONOUS
 
 
 INFLUXDB_HOSTNAME = "localhost"
+INFLUXDB_ORG = "async_exchange_org"
+INFLUXDB_BUCKET_NAME = "async_exchange_bucket"
 INFLUXDB_PORT = 8086
+INFLUXDB_URL = (
+    f"http://{INFLUXDB_HOSTNAME}:{INFLUXDB_PORT}"
+)
+INFLUXDB_TOKEN = "async_exchange_token"
+headers = {}
+headers["Authorization"] = f"Token {INFLUXDB_TOKEN}"
 INFLUXDB_DATABASE = "influxdb_exchange"
 
 TIME_FIELD = "time"
 RECORD_TYPE_FIELD = "measurement"
 FIELDS_TYPE_FIELD = "fields"
 
-LOG_BATCH_SIZE = 1000
+LOG_BATCH_SIZE = 10
 
 
 class InfluxDBLogger:
     def __init__(self):
         self.client = InfluxDBClient(
-            host=INFLUXDB_HOSTNAME, port=INFLUXDB_PORT
+            url=INFLUXDB_URL, token=INFLUXDB_TOKEN, org=INFLUXDB_ORG
         )
-        existing_databases = self.client.get_list_database()
-
-        db_exists = False
-        for database in existing_databases:
-            if INFLUXDB_DATABASE in database["name"]:
-                db_exists = True
-                break
-        if not db_exists:
-            self.client.create_database(INFLUXDB_DATABASE)
-
-        self.client.switch_database(INFLUXDB_DATABASE)
+        self.write_api = self.client.write_api(write_options=SYNCHRONOUS)
 
         self._log_batch = defaultdict(list)
 
@@ -45,11 +44,13 @@ class InfluxDBLogger:
 
     def _emit_messages(self, record_type, record_fields):
         new_records = [
-            {
-                TIME_FIELD: datetime.datetime.now().isoformat(),
-                RECORD_TYPE_FIELD: record_type,
-                FIELDS_TYPE_FIELD: record_field,
-            }
+            Point.from_dict(
+                {
+                    TIME_FIELD: datetime.datetime.now().isoformat(),
+                    RECORD_TYPE_FIELD: record_type,
+                    FIELDS_TYPE_FIELD: record_field,
+                }
+            )
             for record_field in record_fields
         ]
-        self.client.write_points(new_records)
+        self.write_api.write(bucket=INFLUXDB_BUCKET_NAME, record=new_records)
