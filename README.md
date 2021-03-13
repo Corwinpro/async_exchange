@@ -15,18 +15,18 @@ Create your own trader agents in two steps:
   The `cycle` method should emulate the agent's thinking and decision making process.
   The agent can get information about the existing order book, own standing orders via the `exchange_api` methods.
 
-  In the demo example, the `cycle` consists of a "sleep" phase (the agent is inactive) and a random order submission.
+    In the demo example, the `cycle` consists of a "sleep" phase (the agent is inactive) and a random order submission.
 
-  ```python
-  class RandomTrader(Trader):
-    async def cycle(self):
-        while True:
-            await self.sleep()
-            self.place_random_order()
-  ```
+    ```python
+    class RandomTrader(Trader):
+        async def cycle(self):
+            while True:
+                await self.sleep()
+                self.place_random_order()
+    ```
   
-  Note that if any actual CPU-bound computations happen inside the `cycle` method of an agent, the whole event loop will be blocked.
-  Consider delegating heavy computations to an external process that can be awaited.
+    Note that if any actual CPU-bound computations happen inside the `cycle` method of an agent, the whole event loop will be blocked.
+    Consider delegating heavy computations to an external process that can be awaited.
 
 2. Create an environment of agents (not necessarily of the same type), and run the simulation.
 
