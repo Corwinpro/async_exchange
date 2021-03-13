@@ -30,10 +30,17 @@ Create your own trader agents in two steps:
 
 2. Create an environment of agents (not necessarily of the same type), and run the simulation.
 
-Users are welcome to implement their own post-processing and analysis tools.
-In the following sections, we introduce a possible way to store logs and visualize the trading history.
+    Users are welcome to implement their own post-processing and analysis tools.
+    In the following sections, we introduce a possible way to store logs and visualize the trading history.
 
 ### Logging
+
+Users can implement their own logger and pass it to the `Exchange` instance.
+The logger must implement a `send_event` method with two arguments: an `event_type` string, and a `message`.
+
+#### InfluxDB logging
+
+There exists a built-in logging infrastructure.
 
 The [`InfluxDBLogger`](async_exchange/logging/influxdb_logger.py) stores the information about all successful exchange operations from the [`Exchange`](async_exchange/exchange.py) to a local InfluxDB.
 
@@ -46,9 +53,6 @@ It is suggested that the [docker-compose.yml](setup/influxdb/docker-compose.yml)
 $ cd setup/influxdb
 $ docker-compose -f docker-compose.yml up -d
 ```
-
-Alternatively, users can implement their own logger and pass it to the `Exchange` instance.
-The logger must implement a `send_event` method with two arguments: an `event_type` string, and a `message`.
 
 ### Visualization
 
