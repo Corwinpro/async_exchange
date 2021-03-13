@@ -19,11 +19,7 @@ async def main():
     exchange = Exchange(logger=logger)
     api = exchange.api
     tasks = [
-        RandomTrader(
-            exchange_api=api,
-            money=300,
-            stocks=10,
-        ).cycle()
+        RandomTrader(exchange_api=api, money=300, stocks=10).cycle()
         for _ in range(NOF_TRADERS)
     ]
     group = asyncio.gather(*tasks, return_exceptions=False)
