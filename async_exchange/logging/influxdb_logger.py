@@ -15,28 +15,32 @@ LOG_BATCH_SIZE = 1000
 
 
 class InfluxDBLogger:
-    def __init__(self):
+    def __init__(
+        self, database_name=INFLUXDB_DATABASE, batch_size=LOG_BATCH_SIZE
+    ):
         self.client = InfluxDBClient(
             host=INFLUXDB_HOSTNAME, port=INFLUXDB_PORT
         )
+
+        self.database_name = database_name
         existing_databases = self.client.get_list_database()
 
         db_exists = False
         for database in existing_databases:
-            if INFLUXDB_DATABASE in database["name"]:
+            if self.database_name in database["name"]:
                 db_exists = True
                 break
         if not db_exists:
-            self.client.create_database(INFLUXDB_DATABASE)
+            self.client.create_database(self.database_name)
+        self.client.switch_database(self.database_name)
 
-        self.client.switch_database(INFLUXDB_DATABASE)
-
+        self.batch_size = batch_size
         self._log_batch = defaultdict(list)
 
     def send_event(self, record_type, message):
         self._log_batch[record_type].append(message)
 
-        if len(self._log_batch[record_type]) >= LOG_BATCH_SIZE:
+        if len(self._log_batch[record_type]) >= self.batch_size:
             self._emit_messages(
                 record_type=record_type,
                 record_fields=self._log_batch[record_type],
@@ -53,3 +57,7 @@ class InfluxDBLogger:
             for record_field in record_fields
         ]
         self.client.write_points(new_records)
+
+    def get_points(self, record_type):
+        data = self.client.query(f"select * from {record_type};")
+        return data.get_points()
