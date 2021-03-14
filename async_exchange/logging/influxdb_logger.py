@@ -15,7 +15,7 @@ LOG_BATCH_SIZE = 1000
 
 
 class InfluxDBLogger:
-    def __init__(self):
+    def __init__(self, database_name=INFLUXDB_DATABASE):
         self.client = InfluxDBClient(
             host=INFLUXDB_HOSTNAME, port=INFLUXDB_PORT
         )
@@ -23,13 +23,13 @@ class InfluxDBLogger:
 
         db_exists = False
         for database in existing_databases:
-            if INFLUXDB_DATABASE in database["name"]:
+            if database_name in database["name"]:
                 db_exists = True
                 break
         if not db_exists:
-            self.client.create_database(INFLUXDB_DATABASE)
+            self.client.create_database(database_name)
 
-        self.client.switch_database(INFLUXDB_DATABASE)
+        self.client.switch_database(database_name)
 
         self._log_batch = defaultdict(list)
 
