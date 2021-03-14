@@ -16,9 +16,7 @@ grafana:
   ports:
     - 3001:3000
   volumes:
-    - /tmp/exchange/grafana:/var/lib/grafana
     - ./grafana/provisioning:/etc/grafana/provisioning
-    - ./grafana/dashboards:/etc/grafana/dashboards
   restart:
     always
   environment:
