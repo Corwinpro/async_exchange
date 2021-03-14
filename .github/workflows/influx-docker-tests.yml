@@ -1,0 +1,27 @@
+name: InfluxDB docker
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build the docker-compose stack
+      run: |
+        mkdir -p /tmp/exchange/influxdb
+        mkdir -p /tmp/exchange/grafana
+        cd setup/influxdb/
+        docker-compose up -d
+    - name: Sleep
+      uses: jakejarvis/wait-action@master
+      with:
+      time: '60s'
+    - name: Check running containers
+      run: docker ps -a
