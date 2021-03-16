@@ -48,7 +48,7 @@ First, install necessary `influxdb` requirements from the `setup/influxdb/requir
 
 Second, the logger expects an InfluxDB service available on `http://localhost:8086` with a database called `influxdb_exchange`.
 It is suggested that the [docker-compose.yml](setup/influxdb/docker-compose.yml) file is used to spin required services via docker.
-*Important*: the `docker-compose` expect that the `/tmp/exchange/influxdb` and `/tmp/exchange/grafana` directories exist on the host machine.
+*Important*: the `docker-compose` expect that the `/tmp/exchange/influxdb`  directory exists on the host machine.
 ```sh
 $ cd setup/influxdb
 $ docker-compose -f docker-compose.yml up -d
