@@ -224,6 +224,12 @@ class Exchange:
         }
         return buy_orders, sell_orders
 
+    def register_trader(self, trader: Trader):
+        trader.exchange_api = self.api
+
+    def shutdown(self):
+        pass
+
     @property
     def api(self):
         return ExchangeAPI(exchange=self)
