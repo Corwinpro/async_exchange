@@ -7,7 +7,7 @@
 ## Quickstart
 
 The basic usage of the `async_exchange` does not require any additional dependencies.
-Install the package in your preferred environment, and try the [demo](demos/run_exchange.py).
+Install the package in your preferred environment, and try the [demo](demos/run_experiment.py).
 
 Create your own trader agents in two steps:
 
