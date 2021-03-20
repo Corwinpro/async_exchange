@@ -29,7 +29,7 @@ class TradingSession:
         if exchange is not None:
             self.exchange = exchange
         else:
-            self.exchange = Exchange(logger=logger)
+            self.exchange = Exchange(logger=self.logger)
 
         for trader in self.traders:
             self.exchange.register_trader(trader)
