@@ -61,3 +61,5 @@ If the `docker-compose` method from the previous section was used to set up logg
 1. Login to Grafana at `http://localhost:3031` using the standard `admin`/`admin` username and password.
 2. A visualization dashboard should already be created.
    Start the trading session, and the candlestick chart should appear shortly (the dashboard updates every 10 seconds).
+
+![Grafana_screenshot](.github/images/grafana_screenshot.png)
