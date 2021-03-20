@@ -21,10 +21,12 @@ class TestTradingSession(TestCase):
         self.assertIsNotNone(trader.exchange_api)
 
     def test_init_default_exchange(self):
-        trading_session = TradingSession(traders=[])
+        trading_session = TradingSession(
+            traders=[], exchange=None, logger=None
+        )
 
         self.assertIsInstance(trading_session.exchange, Exchange)
-        self.assertIs(trading_session.logger, trading_session.exchange._logger)
+        self.assertIsNone(trading_session.exchange._logger)
 
 
 if __name__ == "__main__":

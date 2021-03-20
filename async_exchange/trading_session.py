@@ -23,13 +23,13 @@ class TradingSession:
     ):
         self.traders = traders
 
-        if logger is None:
-            self.logger = default_logger
-
         if exchange is not None:
             self.exchange = exchange
         else:
-            self.exchange = Exchange(logger=self.logger)
+            self.exchange = Exchange(logger=logger)
+
+        if logger is None:
+            self.logger = default_logger
 
         for trader in self.traders:
             self.exchange.register_trader(trader)
