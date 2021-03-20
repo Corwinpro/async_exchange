@@ -15,6 +15,14 @@ class TestExchange(unittest.TestCase):
         self.trader_4 = Trader(exchange_api=api, money=100, stocks=10)
         self.trader_5 = Trader(exchange_api=api, money=100, stocks=10)
 
+    def test_register_trader(self):
+        trader = Trader()
+        self.assertIsNone(trader.exchange_api)
+
+        self.exchange.register_trader(trader)
+        self.assertIsNotNone(trader.exchange_api)
+        self.assertIsInstance(trader.exchange_api, ExchangeAPI)
+
     def test_submit_buy_order(self):
         self.trader_1.buy(100, 10)
 

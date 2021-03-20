@@ -225,9 +225,13 @@ class Exchange:
         return buy_orders, sell_orders
 
     def register_trader(self, trader: Trader):
+        """Register a ``trader`` in the Exchange.
+        Provides the ``exchange_api`` to the ``trader``.
+        """
         trader.exchange_api = self.api
 
     def shutdown(self):
+        """Perform necessary actions to shutdown the ``Exchange`` instance."""
         pass
 
     @property
