@@ -1,5 +1,6 @@
 from async_exchange.algorithms.random_trader import RandomTrader
-from async_exchange.experiment import Experiment
+from async_exchange.trading_session import TradingSession
+
 try:
     from async_exchange.logging.influxdb_logger import InfluxDBLogger
 except ImportError:
@@ -14,9 +15,6 @@ NOF_TRADERS = 100
 
 
 if __name__ == "__main__":
-    traders = [
-        RandomTrader(money=300, stocks=10)
-        for _ in range(NOF_TRADERS)
-    ]
-    experiment = Experiment(traders=traders, logger=logger)
-    experiment.run()
+    traders = [RandomTrader(money=300, stocks=10) for _ in range(NOF_TRADERS)]
+    session = TradingSession(traders=traders, logger=logger)
+    session.run()
