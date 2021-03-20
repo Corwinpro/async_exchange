@@ -7,7 +7,7 @@
 ## Quickstart
 
 The basic usage of the `async_exchange` does not require any additional dependencies.
-Install the package in your preferred environment, and try the [demo](demos/run_exchange.py).
+Install the package in your preferred environment, and try the [demo](demos/run_session.py).
 
 Create your own trader agents in two steps:
 
@@ -60,4 +60,4 @@ If the `docker-compose` method from the previous section was used to set up logg
 
 1. Login to Grafana at `http://localhost:3031` using the standard `admin`/`admin` username and password.
 2. A visualization dashboard should already be created.
-   Start the trading experiment, and the candlestick chart should appear shortly (the dashboard updates every 10 seconds).
+   Start the trading session, and the candlestick chart should appear shortly (the dashboard updates every 10 seconds).
