@@ -370,6 +370,36 @@ class TestExchange(unittest.TestCase):
         self.assertEqual(self.trader_3.stocks, 11)
         self.assertEqual(self.trader_3.money, 99)
 
+    def test_cancel_order(self):
+        order = BuyOrder(owner=self.trader_1, amount=10, price=10)
+        self.exchange.process_order(order)
+        self.assertEqual(len(self.exchange.buy_levels[10]), 1)
+
+        result = self.exchange.cancel_order(order=order)
+        self.assertTrue(result)
+        self.assertEqual(len(self.exchange.buy_levels[10]), 0)
+        self.assertEqual(len(self.exchange.buy_levels), 1)
+
+    def test_cancel_order_two_traders(self):
+        order_1 = BuyOrder(owner=self.trader_1, amount=10, price=10)
+        self.exchange.process_order(order_1)
+        order_2 = BuyOrder(owner=self.trader_2, amount=10, price=10)
+        self.exchange.process_order(order_2)
+
+        result = self.exchange.cancel_order(order=order_1)
+        self.assertTrue(result)
+        self.assertEqual(len(self.exchange.buy_levels[10]), 1)
+        buy_order, = self.exchange.buy_levels[10]
+        self.assertIs(buy_order, order_2)
+        self.assertEqual(len(self.exchange.buy_levels), 1)
+
+    def test_cancel_order_does_not_exist(self):
+        order = BuyOrder(owner=self.trader_1, amount=10, price=10)
+        self.assertEqual(len(self.exchange.buy_levels), 0)
+
+        result = self.exchange.cancel_order(order=order)
+        self.assertFalse(result)
+
 
 class TestExchangeAPI(unittest.TestCase):
     def setUp(self):
@@ -379,10 +409,9 @@ class TestExchangeAPI(unittest.TestCase):
     def test_exchange_api(self):
         self.assertIsInstance(self.api, ExchangeAPI)
         self.assertEqual(self.api.process_order, self.exchange.process_order)
-        self.assertEqual(
-            self.api.standing_orders, self.exchange.standing_orders
-        )
+        self.assertEqual(self.api.standing_orders, self.exchange.standing_orders)
         self.assertEqual(self.api.get_orderbook, self.exchange.get_orderbook)
+        self.assertEqual(self.api.cancel_order, self.exchange.cancel_order)
 
 
 if __name__ == "__main__":

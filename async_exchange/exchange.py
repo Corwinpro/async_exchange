@@ -1,7 +1,7 @@
 from collections import defaultdict, deque
 import logging
 
-from async_exchange.orders import BuyOrder, SellOrder
+from async_exchange.orders import BuyOrder, SellOrder, _Order
 from async_exchange.trader import (
     NotEnoughMoneyError,
     NotEnoughStocksError,
@@ -198,16 +198,46 @@ class Exchange:
                     self.buy_levels.pop(current_best_buy)
             self._process_sell_order(order)
 
+    def cancel_order(self, order: _Order) -> bool:
+        """ Cancel the given ``order`` by removing it from the OrderBook.
+        The order is identified by its ``id``.
+
+        Note: the existing implementation is far from optimal because the
+        ``Level`` is essentially a deque with O(n) complexity for removal by
+        index. Alternative approaches are:
+        - set the volume of the ``Order`` to zero in the orderbook (such that
+        it does not yield actual exchange)
+        - rework the ``Level`` to be an ordered dict
+        """
+        if isinstance(order, BuyOrder):
+            level = self.buy_levels[order.price]
+        elif isinstance(order, SellOrder):
+            level = self.sell_levels[order.price]
+        else:
+            return False
+
+        index_in_orderbook = None
+        for index, existing_order in enumerate(level):
+            if existing_order.id == order.id:
+                index_in_orderbook = index
+                break
+
+        if index_in_orderbook is None:
+            return False
+
+        del level[index_in_orderbook]
+        return True
+
     def standing_orders(self, trader):
         buy_orders = tuple(
             order
-            for level in self.buy_levels
+            for level in self.buy_levels.values()
             for order in level
             if order.owner is trader
         )
         sell_orders = tuple(
             order
-            for level in self.sell_levels
+            for level in self.sell_levels.values()
             for order in level
             if order.owner is trader
         )
@@ -244,6 +274,7 @@ class ExchangeAPI:
         self._process_order = exchange.process_order
         self._standing_orders = exchange.standing_orders
         self._get_order_book = exchange.get_orderbook
+        self._cancel_order = exchange.cancel_order
 
     @property
     def process_order(self):
@@ -256,3 +287,7 @@ class ExchangeAPI:
     @property
     def get_orderbook(self):
         return self._get_order_book
+
+    @property
+    def cancel_order(self):
+        return self._cancel_order
