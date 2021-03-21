@@ -1,4 +1,4 @@
-from async_exchange.orders import BuyOrder, SellOrder
+from async_exchange.orders import BuyOrder, SellOrder, _Order
 
 
 class NotEnoughMoneyError(ValueError):
@@ -61,6 +61,29 @@ class Trader:
 
     def inspect_exchange(self):
         return self.exchange_api.get_orderbook()
+
+    @property
+    def standing_orders(self):
+        """ Get two tuples of standing orders from ``self``.
+        """
+        return self.exchange_api.standing_orders(self)
+
+    def cancel_order(self, order: _Order) -> bool:
+        """ Cancel the ``order``: the order will be removed from the
+        exchange's order book. If the ``order`` has been successfully
+        removed, returns ``True``. If the ``order`` cannot be removed,
+        returns ``False``.
+        """
+        return self.exchange_api.cancel_order(order)
+
+    def cancel_all_orders(self) -> bool:
+        """ Cancel all orders the ``_Trader`` has submitted. Returns
+        ``True`` iif all standing orders have been successfully removed.
+        """
+        buy_orders, sell_orders = self.standing_orders
+        return all(
+            self.cancel_order(order) for order in buy_orders + sell_orders
+        )
 
     def __str__(self):
         return f"Trader {self._id}: stocks {self.stocks}, cash {self.money}"
