@@ -7,6 +7,8 @@ influxdb:
     - /tmp/exchange/influxdb:/var/lib/influxdb
   environment:
       INFLUXDB_DB: influxdb_exchange
+      # Flux query endpoint is enabled
+      INFLUXDB_HTTP_FLUX_ENABLED: 'true'
   restart:
     always
 
