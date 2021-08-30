@@ -6,7 +6,7 @@ from influxdb_client import (
     Point,
     WriteOptions
 )
-from influxdb_client.client.write_api import SYNCHRONOUS
+
 
 logger = logging.getLogger(__name__)
 
