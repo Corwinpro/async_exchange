@@ -1,50 +1,41 @@
 import unittest
 
+from influxdb_client.client.write_api import SYNCHRONOUS
+
 from async_exchange.logging.influxdb_logger import InfluxDBLogger
 
 
 class TestInfluxDBLogger(unittest.TestCase):
     def setUp(self):
-        self.logger = InfluxDBLogger(database_name="test_db", batch_size=1)
+        self.logger = InfluxDBLogger(bucket_name="test_bucket", batch_size=10)
+
+        def cleanup_bucket():
+            bucket = self.logger.buckets_api.find_bucket_by_name("test_bucket")
+            self.logger.buckets_api.delete_bucket(bucket=bucket)
+
+        self.addCleanup(cleanup_bucket)
         self.addCleanup(self.logger.client.close)
-        self.addCleanup(self.logger.client.drop_database, "test_db")
 
-    def test__emit_messages(self):
-        self.logger._emit_messages(
-            record_type="my_event_type",
-            record_fields=[{"data": 1, "comment": "another comment"}],
+    def test_send_event_get_event(self):
+        # Convert the write API to synchronous to avoid waiting for background
+        # threads finishing writing
+        self.logger.write_api = self.logger.client.write_api(
+            write_options=SYNCHRONOUS
         )
-
-        (point,) = self.logger.get_points("my_event_type")
-        self.assertEqual(point["data"], 1)
-        self.assertEqual(point["comment"], "another comment")
-
-    def test_send_event_in_batches_one(self):
-        self.assertEqual(self.logger.batch_size, 1)
-
-        self.logger.send_event(record_type="type", message={"data": "my data"})
-        (point,) = self.logger.get_points("type")
-        self.assertEqual(point["data"], "my data")
-
-    def test_send_event_in_batches_many(self):
-        self.logger.batch_size = 10
-        self.assertEqual(self.logger.batch_size, 10)
-
-        for i in range(9):
-            self.logger.send_event(
-                record_type="type", message={"data": f"my data {i}"}
-            )
-
-        points = list(self.logger.get_points("type"))
-        self.assertEqual(len(points), 0)
 
         self.logger.send_event(
-            record_type="type", message={"data": "my data 9"}
+            record_type="type",
+            message={"data": "my data", "another data": "something else"}
         )
-        for i, point in enumerate(self.logger.get_points("type")):
-            self.assertEqual(point["data"], f"my data {i}")
+        point, = self.logger.get_events("type")
+        self.assertEqual(point["_measurement"], "type")
+        self.assertEqual(point["data"], "my data")
+        self.assertEqual(point["another data"], "something else")
 
-        self.assertEqual(len(self.logger._log_batch["type"]), 0)
+    def test_batch_set(self):
+        self.assertEqual(
+            self.logger.write_api._write_options.batch_size, 10
+        )
 
 
 if __name__ == "__main__":

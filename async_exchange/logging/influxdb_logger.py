@@ -1,11 +1,23 @@
-from collections import defaultdict
-import datetime
-from influxdb import InfluxDBClient
+import logging
 
+from influxdb_client import (
+    BucketRetentionRules,
+    InfluxDBClient,
+    Point,
+    WriteOptions
+)
+from influxdb_client.client.write_api import SYNCHRONOUS
 
-INFLUXDB_HOSTNAME = "localhost"
+logger = logging.getLogger(__name__)
+
+INFLUXDB_HOSTNAME = "http://localhost"
 INFLUXDB_PORT = 8086
-INFLUXDB_DATABASE = "influxdb_exchange"
+INFLUXDB_URL = f"{INFLUXDB_HOSTNAME}:{INFLUXDB_PORT}"
+
+# A default auth token
+INFLUXDB_TOKEN = "my-super-secret-auth-token"
+ORGANIZATION = "myorg"
+BUCKET = "exchange"
 
 TIME_FIELD = "time"
 RECORD_TYPE_FIELD = "measurement"
@@ -16,48 +28,59 @@ LOG_BATCH_SIZE = 1000
 
 class InfluxDBLogger:
     def __init__(
-        self, database_name=INFLUXDB_DATABASE, batch_size=LOG_BATCH_SIZE
+        self,
+        bucket_name=BUCKET,
+        batch_size=LOG_BATCH_SIZE,
+        data_retention=3600,
     ):
+        self.organization = ORGANIZATION
         self.client = InfluxDBClient(
-            host=INFLUXDB_HOSTNAME, port=INFLUXDB_PORT
+            url=INFLUXDB_URL, token=INFLUXDB_TOKEN, org=self.organization
         )
-
-        self.database_name = database_name
-        existing_databases = self.client.get_list_database()
-
-        db_exists = False
-        for database in existing_databases:
-            if self.database_name in database["name"]:
-                db_exists = True
-                break
-        if not db_exists:
-            self.client.create_database(self.database_name)
-        self.client.switch_database(self.database_name)
-
         self.batch_size = batch_size
-        self._log_batch = defaultdict(list)
+        self.bucket_name = bucket_name
+
+        self.write_api = self.client.write_api(
+            write_options=WriteOptions(batch_size=self.batch_size)
+        )
+        self.query_api = self.client.query_api()
+        self.buckets_api = self.client.buckets_api()
+        bucket = self.buckets_api.find_bucket_by_name(self.bucket_name)
+        if bucket is None:
+            logger.warning(
+                f"Bucket {self.bucket_name!r} not found. "
+                f"Creating a bucket {self.bucket_name!r}."
+            )
+            retention_rules = None
+            if data_retention is not None:
+                retention_rules = BucketRetentionRules(
+                    type="expire", every_seconds=data_retention
+                )
+            self.buckets_api.create_bucket(
+                bucket_name=self.bucket_name,
+                retention_rules=retention_rules,
+                org=self.organization,
+            )
 
     def send_event(self, record_type, message):
-        self._log_batch[record_type].append(message)
+        point = Point(record_type)
+        for key, value in message.items():
+            point = point.field(key, value)
+        self.write_api.write(bucket=self.bucket_name, record=point)
 
-        if len(self._log_batch[record_type]) >= self.batch_size:
-            self._emit_messages(
-                record_type=record_type,
-                record_fields=self._log_batch[record_type],
-            )
-            self._log_batch[record_type] = []
-
-    def _emit_messages(self, record_type, record_fields):
-        new_records = [
-            {
-                TIME_FIELD: datetime.datetime.now().isoformat(),
-                RECORD_TYPE_FIELD: record_type,
-                FIELDS_TYPE_FIELD: record_field,
-            }
-            for record_field in record_fields
-        ]
-        self.client.write_points(new_records)
-
-    def get_points(self, record_type):
-        data = self.client.query(f"select * from {record_type};")
-        return data.get_points()
+    def get_events(self, record_type):
+        query = '''
+            from(bucket: currentBucket)
+            |> range(start: -5m, stop: now())
+            |> filter(fn: (r) => r._measurement == recordType)
+            |> pivot(rowKey:["_time"], columnKey: ["_field"], \
+                valueColumn: "_value")
+        '''
+        params = {"currentBucket": self.bucket_name, "recordType": record_type}
+        tables = self.query_api.query(query=query, params=params)
+        if len(tables) > 0:
+            table, *_ = tables
+            events = table.records
+        else:
+            events = []
+        return events
