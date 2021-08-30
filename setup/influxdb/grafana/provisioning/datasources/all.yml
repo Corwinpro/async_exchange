@@ -9,20 +9,14 @@ datasources:
   type: influxdb
   access: proxy
   url: http://host.docker.internal:8086
-  password:
-  user:
   database: influxdb_exchange
-  basicAuth: false
-  basicAuthUser:
-  basicAuthPassword:
-  withCredentials:
   isDefault: true
   jsonData:
-     tlsAuth: false
-     tlsAuthWithCACert: false
+    version: Flux
+    organization: "myorg"
+    defaultBucket: exchange
+    tlsSkipVerify: true
+    timeInterval: "1m"
   secureJsonData:
-    tlsCACert: ""
-    tlsClientCert: ""
-    tlsClientKey: ""
-  version: 1
+    token: "my-super-secret-auth-token"
   editable: true

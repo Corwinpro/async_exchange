@@ -11,5 +11,6 @@ lib64
 async_exchange.egg-info/
 exchange-py39/
 .vscode/
+.idea/
 __pycache__/
 .coverage
