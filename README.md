@@ -46,11 +46,12 @@ The [`InfluxDBLogger`](async_exchange/logging/influxdb_logger.py) stores the inf
 
 First, install necessary `influxdb` requirements from the `setup/influxdb/requirements.txt`.
 
-Second, the logger expects an InfluxDB service available on `http://localhost:8086` with a database called `influxdb_exchange`.
-It is suggested that the [docker-compose.yml](setup/influxdb/docker-compose.yml) file is used to spin required services via docker.
+Second, the logger expects an InfluxDB service available on `http://localhost:8086`.
+Use the [docker-compose.yml](setup/influxdb/docker-compose.yml) file to start required services via docker.
 *Important*: the `docker-compose` expect that the `/tmp/exchange/influxdb`  directory exists on the host machine.
 ```sh
 $ cd setup/influxdb
+$ mkdir -p /tmp/exchange/influxdb
 $ docker-compose -f docker-compose.yml up -d
 ```
 
@@ -59,7 +60,7 @@ $ docker-compose -f docker-compose.yml up -d
 If the `docker-compose` method from the previous section was used to set up logging, a Grafana service is a suggested way to visualize trading sessions.
 
 1. Login to Grafana at `http://localhost:3031` using the standard `admin`/`admin` username and password.
-2. A visualization dashboard should already be created.
-   Start the trading session, and the candlestick chart should appear shortly (the dashboard updates every 10 seconds).
+2. A visualization dashboard should have already been created.
+   Start the trading session, and the candlestick chart should appear shortly (the dashboard updates every 5 seconds).
 
 ![Grafana_screenshot](.github/images/grafana_screenshot.png)
