@@ -1,0 +1,85 @@
+{
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": "-- Grafana --",
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "target": {
+            "limit": 100,
+            "matchAny": false,
+            "tags": [],
+            "type": "dashboard"
+          },
+          "type": "dashboard"
+        }
+      ]
+    },
+    "editable": true,
+    "gnetId": null,
+    "graphTooltip": 0,
+    "links": [],
+    "panels": [
+      {
+        "barColor": "#000000",
+        "bearColor": "#ff4a3a",
+        "bullColor": "#26ff42",
+        "candlestickWidth": 9,
+        "colorizeTooltip": true,
+        "datasource": null,
+        "dojiColor": "#c8c9ca",
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 0
+        },
+        "id": 2,
+        "indicators": [],
+        "labelY1": null,
+        "labelY2": null,
+        "maxDataPoints": 80,
+        "mode": "color",
+        "seriesOverrides": [
+          {
+            "alias": "volume",
+            "color": "#7EB26D",
+            "fill": 0,
+            "linewidth": 1
+          }
+        ],
+        "solidColor": "#000000",
+        "swapYaxes": true,
+        "targets": [
+          {
+            "query": "data = from(bucket: \"exchange\")\n |> range(start: -2h)\n |> filter(fn: (r) =>\n    r._measurement == \"exchange\"\n  )\n\nvolume = data |> filter(fn: (r) => r._field == \"amount\") |> map(fn: (r) => ({ _value:r._value, _time:r._time, _field:\"volume\" }))\n\nprice = data |> filter(fn: (r) => r._field == \"price\")\n\nhigh = price |> aggregateWindow(every: 10s, fn: max) |> map(fn: (r) => ({ _value:r._value, _time:r._time, _field:\"high\" }))\nlow = price |> aggregateWindow(every: 10s, fn: min) |> map(fn: (r) => ({ _value:r._value, _time:r._time, _field:\"low\" }))\nopen = price |> aggregateWindow(every: 10s, fn: first) |> map(fn: (r) => ({ _value:r._value, _time:r._time, _field:\"open\" }))\nclose = price |> aggregateWindow(every: 10s, fn: last) |> map(fn: (r) => ({ _value:r._value, _time:r._time, _field:\"close\" }))\n\nunion(tables: [high, low, open, close, volume])\n",
+            "refId": "A"
+          }
+        ],
+        "title": "Simulation results",
+        "tooltipFormat": "YYYY-MM-DD HH:mm:ss",
+        "transparentTooltip": false,
+        "type": "ilgizar-candlestick-panel",
+        "widthMode": "auto"
+      }
+    ],
+    "schemaVersion": 30,
+    "refresh": "5s",
+    "style": "dark",
+    "tags": [],
+    "templating": {
+      "list": []
+    },
+    "time": {
+      "from": "now-5m",
+      "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "",
+    "title": "Exchange",
+    "uid": "66STjcVnz",
+    "version": 4
+  }

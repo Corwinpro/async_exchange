@@ -1,19 +1,22 @@
 influxdb:
-  image: influxdb:1.8.4
+  image: influxdb
   container_name: influxdb
   ports:
     - 8086:8086
   volumes:
     - /tmp/exchange/influxdb:/var/lib/influxdb
   environment:
-      INFLUXDB_DB: influxdb_exchange
-      # Flux query endpoint is enabled
-      INFLUXDB_HTTP_FLUX_ENABLED: 'true'
+      DOCKER_INFLUXDB_INIT_MODE: "setup"
+      DOCKER_INFLUXDB_INIT_USERNAME: "admin"
+      DOCKER_INFLUXDB_INIT_PASSWORD: "password"
+      DOCKER_INFLUXDB_INIT_ORG: "myorg"
+      DOCKER_INFLUXDB_INIT_BUCKET: "exchange"
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: "my-super-secret-auth-token"
   restart:
     always
 
 grafana:
-  image: grafana/grafana:7.4.0
+  image: grafana/grafana
   container_name: grafana
   ports:
     - 3001:3000
@@ -23,3 +26,4 @@ grafana:
     always
   environment:
     - GF_INSTALL_PLUGINS=https://github.com/ilgizar/ilgizar-candlestick-panel/raw/master/pack/ilgizar-candlestick-panel.zip;ilgizar-candlestick-panel
+    - GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS=ilgizar-candlestick-panel
