@@ -22,7 +22,7 @@ jobs:
         mkdir -p /tmp/exchange/influxdb
         mkdir -p /tmp/exchange/grafana
         cd setup/influxdb/
-        docker-compose up -d
+        docker-compose --verbose up -d
     - name: Sleep
       uses: jakejarvis/wait-action@master
       with:
